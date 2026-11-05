@@ -1,0 +1,57 @@
+name: Build unsigned IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the Xcode project
+        run: xcodegen generate
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build the app (no code signing)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project J078.xcodeproj \
+            -scheme J078 \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package Payload/ into an .ipa
+        run: |
+          APP="build/Build/Products/Release-iphoneos/J078.app"
+          test -d "$APP" || { echo "J078.app not found"; ls -R build/Build/Products || true; exit 1; }
+          rm -rf Payload
+          mkdir Payload
+          cp -R "$APP" Payload/
+          zip -qry J078-unsigned.ipa Payload
+          ls -lh J078-unsigned.ipa
+
+      - name: Upload the .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: J078-unsigned-ipa
+          path: J078-unsigned.ipa
+          if-no-files-found: error

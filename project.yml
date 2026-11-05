@@ -1,0 +1,24 @@
+name: J078
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  J078:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: J078
+    settings:
+      base:
+        PRODUCT_NAME: J078
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.j078app
+        INFOPLIST_FILE: Support/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ENABLE_BITCODE: NO
+    scheme: {}
